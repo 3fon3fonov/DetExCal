@@ -3,7 +3,7 @@
  
 
 
-**DetExCal** is a simple SNR calculator with convinient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
+**DetExCal** is a simple SNR calculator with a convenient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
 
 
 
@@ -14,11 +14,11 @@
  
 
 
-Please keep in mind that this software is developed mostly for my needs and fun. I hope, however, that you may find it capable of solving your scientific problems, too. At the moment, there is NO documentation,
+Please keep in mind that this software is developed mainly for my needs and for fun. I hope, however, that you may find it capable of solving your scientific problems, too. At the moment, there is NO documentation,
 but as you will find, the GUI is self-explanatory.   
 
 Feedback and help in further development will be highly appreciated!
-A wish-list with your favorite tools and methods to be implemented is also welcome!    
+A wish list with your favorite tools and methods to be implemented is also welcome!    
 
 Just open an "Issue" on the GitHub, or send a PM to trifonov@mpia.de.    
 
@@ -54,7 +54,7 @@ $ python DetExCal.py (inside of the git clone directory)
 
 In [1]: import DetExCal
 
-* or e.g., to load the RV routines:
+* or, e.g., to load the RV routines:
 
 In [1]: import DetExCal   
      
