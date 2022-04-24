@@ -2,7 +2,10 @@
 **Det**ector **Ex**posure **Cal**culator: **DetExCal** 
  
 
-
+<p align="center">
+  <img width="400" src="./DetExCal.png">
+</p>
+ 
 **DetExCal** is a simple SNR calculator with a convenient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
 
 
@@ -46,18 +49,10 @@ $ DetExCal (in case of pip install)
 
 * or just do:
 
-$ python DetExCal.py (inside of the git clone directory)
+$ python3 DetExCal.py (inside of the git clone directory)
  
 
-
-* If you want to use the library on the Python shell/script
-
-In [1]: import DetExCal
-
-* or, e.g., to load the RV routines:
-
-In [1]: import DetExCal   
-     
+ 
 
 **Credit**
 
