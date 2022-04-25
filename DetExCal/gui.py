@@ -373,8 +373,8 @@ will be highly appreciated!
         npix = np.pi* (self.seeing.value()* self.plate_scale.value() / self.CCD_px.value() ) **2
         dark_current = self.mag2flux(self.Dark_current.value())
 
-        signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*self.Quant_eff.value()
-        bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*self.Quant_eff.value()
+        signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
+        bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
         Idc       = dark_current*self.seeing.value()* self.plate_scale.value()
         readnoise = self.Read_noise.value()*self.seeing.value()* self.plate_scale.value()
 
@@ -435,7 +435,7 @@ will be highly appreciated!
         try:        
             for i in range(len(mag)):
                 flux = self.mag2flux(mag[i]) #airmass?
-                signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*self.Quant_eff.value()
+                signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
                 CtG = signal*gain*time
                 snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time+(readnoise**2)*npix )))                
         except RuntimeWarning:
