@@ -128,6 +128,8 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(len(zzz)):
 
             zzz[i].setAxisItems({'bottom': pg_hack.CustomAxisItem('bottom')})
+            zzz[i].setAxisItems({'left': pg_hack.CustomAxisItem('left')})
+
             #zzz[i].getAxis("bottom").tickFont = self.plot_font
             zzz[i].getAxis("bottom").setStyle(tickTextOffset = 12, tickFont = self.plot_font)
             zzz[i].getAxis("top").setStyle(tickTextOffset = 12, tickFont = self.plot_font)
@@ -346,7 +348,8 @@ will be highly appreciated!
                 plot_wg.removeItem(kk)
                 
     def mag2flux(self,magnitude):
-        return 9.6e10*(10**(-magnitude/2.5))
+        return 9.6e10*(10**(-magnitude/2.5))  # phot. /(um m^2 sec)
+        #return 10**((-magnitude)/2.5)
 
     def flux2mag(self,flux):
         return -2.5*np.log10(flux/9.6e10)
@@ -365,18 +368,23 @@ will be highly appreciated!
 
         #p1.addLine(x=None, y=0,   pen=pg.mkPen('#ff9933', width=0.8))
         time       = np.arange(1,self.Max_int_time.value(),1)
-        magnitudes = np.arange(0,self.V_band.value()+0.1,0.1)
+        #magnitudes = np.arange(0,self.V_band.value()+0.1,0.1)
+        time       = np.linspace(0.1,self.Max_int_time.value(),300)
+        magnitudes = np.linspace(-3,self.V_band.value()+0.1,300)
+ 
 
+
+        radius = (self.seeing.value()*(self.plate_scale.value() / self.CCD_px.value()))/2.0 # [pix/"] 
         flux = self.mag2flux(self.V_band.value()) #airmass?
-        bgr  = self.mag2flux(self.Sky.value() -2.5*np.log10((self.CCD_px.value()/self.plate_scale.value())**2))  
-     
-        npix = np.pi* (self.seeing.value()* self.plate_scale.value() / self.CCD_px.value() ) **2
-        dark_current = self.mag2flux(self.Dark_current.value())
+        bgr  = self.mag2flux(self.Sky.value()) #-2.5*np.log10((self.CCD_px.value()/self.plate_scale.value())**2)
 
-        signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
-        bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
-        Idc       = dark_current*self.seeing.value()* self.plate_scale.value()
-        readnoise = self.Read_noise.value()*self.seeing.value()* self.plate_scale.value()
+        npix = np.pi* (radius**2)
+
+        signal   = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
+        bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
+        Idc       = self.Dark_current.value() #*self.seeing.value()* self.plate_scale.value()
+        readnoise = self.Read_noise.value() 
+ 
 
         snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, Idc =Idc, time=time, readnoise=readnoise, npix=npix)
 
@@ -386,16 +394,17 @@ will be highly appreciated!
         
         model_curve.setZValue(self.RV_model_z.value()) 
 
-        snr_vs_mag = self.ccd_SNR_vs_mag(signal=signal,bgnd=bg_noise, Idc =Idc, time=self.Max_int_time.value(), readnoise=readnoise, npix=npix,mag=magnitudes)
-
+        snr_vs_mag = np.array(self.ccd_SNR_vs_mag(signal=signal,bgnd=bg_noise, Idc =Idc, time=self.Max_int_time.value(), readnoise=readnoise, npix=npix,mag=magnitudes))
+    
         model_curve_mag = p2.plot(magnitudes,snr_vs_mag, 
         pen={'color': colors[-1], 'width': self.rv_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
         viewRect=True, labels =  {'left':'RV', 'bottom':'JD'}) 
         
         model_curve_mag.setZValue(self.RV_model_z.value()) 
- 
+
         p2.getViewBox().invertX(True)
-        p2.setYRange(0, snr_vs_mag[int((self.V_band.value() - self.V_band.value()-3)*10)], padding=0.01)
+        sub_snr = snr_vs_mag[np.where(magnitudes > self.V_band.value()-3)]
+        p2.setYRange(0, max(sub_snr) , padding=0.01)
         p2.setXRange(self.V_band.value()-3, self.V_band.value(), padding=0.01) 
 
         if self.SNR_plot_autorange.isChecked():
@@ -418,8 +427,9 @@ will be highly appreciated!
  
         try:        
             for i in range(len(time)):
-                CtG = signal*gain*time[i]
-                snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time[i]+(readnoise**2)*npix )))                
+               # CtG = signal*gain*time[i]
+                #snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time[i]+(readnoise**2)*npix )))   
+                snr.append((signal*time[i]) / (np.sqrt( signal*time[i] + (bgnd*npix)*time[i] + (Idc*npix)*time[i] + (readnoise**2)*npix )))   
         except RuntimeWarning:
             print("Error: cannot handle time = 0. Try again.")
         return np.array(snr)
@@ -435,7 +445,7 @@ will be highly appreciated!
         try:        
             for i in range(len(mag)):
                 flux = self.mag2flux(mag[i]) #airmass?
-                signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value()/1000.0)*(self.Quant_eff.value()/100.0)
+                signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
                 CtG = signal*gain*time
                 snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time+(readnoise**2)*npix )))                
         except RuntimeWarning:
