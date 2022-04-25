@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-__author__ = 'Trifon Trifonov'
+__author__ = 'Trifon Trifonov, 25 April 2022'
 
 import time 
 from pathos.multiprocessing import freeze_support
@@ -93,16 +93,15 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
     def set_Win_widget_Style(self, widget):
-        QtWidgets.QApplication.setStyle(QtGui.QStyleFactory.create('Windows'))
+        QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Windows'))
     def set_Fus_widget_Style(self, widget):
-        QtWidgets.QApplication.setStyle(QtGui.QStyleFactory.create('Fusion'))
+        QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
     def set_Mac_widget_Style(self, widget):
         if sys.platform != "darwin":
-            self.tabWidget_helper.setCurrentWidget(self.tab_info)
             print("\n 'Macintosh' window style is only available on MAC OS !!!\n")
             return
         else:
-            QtWidgets.QApplication.setStyle(QtGui.QStyleFactory.create('Macintosh'))
+            QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Macintosh'))
 
     def initialize_color_dialog(self):
 
@@ -347,14 +346,10 @@ will be highly appreciated!
             elif kk.__class__.__name__ == "TextItem":
                 plot_wg.removeItem(kk)
                 
-    def mag2flux(self,magnitude):
+    def magnitude_to_flux(self,magnitude):
         return 9.6e10*(10**(-magnitude/2.5))  # phot. /(um m^2 sec)
-        #return 10**((-magnitude)/2.5)
-
-    def flux2mag(self,flux):
-        return -2.5*np.log10(flux/9.6e10)
-
-
+ 
+ 
 
     def update_SNR_plot(self):
         global p1,p2
@@ -375,18 +370,18 @@ will be highly appreciated!
 
 
         radius = (self.seeing.value()*(self.plate_scale.value() / self.CCD_px.value()))/2.0 # [pix/"] 
-        flux = self.mag2flux(self.V_band.value()) #airmass?
-        bgr  = self.mag2flux(self.Sky.value()) #-2.5*np.log10((self.CCD_px.value()/self.plate_scale.value())**2)
+        flux = self.magnitude_to_flux(self.V_band.value()) #airmass?
+        bgr  = self.magnitude_to_flux(self.Sky.value()) #-2.5*np.log10((self.CCD_px.value()/self.plate_scale.value())**2)
 
         npix = np.pi* (radius**2)
 
         signal   = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
         bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
-        Idc       = self.Dark_current.value() #*self.seeing.value()* self.plate_scale.value()
+        DCurent       = self.Dark_current.value() #*self.seeing.value()* self.plate_scale.value()
         readnoise = self.Read_noise.value() 
  
 
-        snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, Idc =Idc, time=time, readnoise=readnoise, npix=npix)
+        snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
         model_curve = p1.plot(time,snr_vs_time, 
         pen={'color': colors[-1], 'width': self.rv_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
@@ -394,7 +389,7 @@ will be highly appreciated!
         
         model_curve.setZValue(self.RV_model_z.value()) 
 
-        snr_vs_mag = np.array(self.ccd_SNR_vs_mag(signal=signal,bgnd=bg_noise, Idc =Idc, time=self.Max_int_time.value(), readnoise=readnoise, npix=npix,mag=magnitudes))
+        snr_vs_mag = np.array(self.ccd_SNR_vs_mag(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=self.Max_int_time.value(), readnoise=readnoise, npix=npix,mag=magnitudes))
     
         model_curve_mag = p2.plot(magnitudes,snr_vs_mag, 
         pen={'color': colors[-1], 'width': self.rv_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
@@ -417,39 +412,29 @@ will be highly appreciated!
 
 
  
-    def ccd_SNR_vs_time(self,signal=1,bgnd=0,readnoise=0,Idc=0,npix=1,time=1,gain=1):
+    def ccd_SNR_vs_time(self,signal=1,bgnd=0,readnoise=0,DCurent=0,npix=1,time=1,gain=1):
         """
-        This is the famous CCD equation.
+        CCD equation. Gain is ignorred for now.
         """
-        snr = []
-        time = np.asarray(time)
-        warnings.filterwarnings("error")
- 
-        try:        
-            for i in range(len(time)):
-               # CtG = signal*gain*time[i]
-                #snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time[i]+(readnoise**2)*npix )))   
-                snr.append((signal*time[i]) / (np.sqrt( signal*time[i] + (bgnd*npix)*time[i] + (Idc*npix)*time[i] + (readnoise**2)*npix )))   
-        except RuntimeWarning:
-            print("Error: cannot handle time = 0. Try again.")
+        snr = []      
+        for i in range(len(time)):
+            CtG = signal*gain*time[i]
+            snr.append(CtG / (np.sqrt( CtG + (bgnd*npix)*time[i] + (DCurent*npix)*time[i] + (readnoise**2)*npix )))   
+
         return np.array(snr)
 
-    def ccd_SNR_vs_mag(self,signal=1,bgnd=0,readnoise=0,Idc=0,npix=1,time=1,gain=1,mag=0):
+    def ccd_SNR_vs_mag(self,signal=1,bgnd=0,readnoise=0,DCurent=0,npix=1,time=1,gain=1,mag=0):
         """
-        This is the famous CCD equation.
+        CCD equation. Gain is ignorred for now.
         """
-        snr = []
-        mag = np.asarray(mag)
-        warnings.filterwarnings("error")
-         
-        try:        
-            for i in range(len(mag)):
-                flux = self.mag2flux(mag[i]) #airmass?
-                signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
-                CtG = signal*gain*time
-                snr.append(CtG/(np.sqrt( (signal+bgnd*npix+Idc*npix)*time+(readnoise**2)*npix )))                
-        except RuntimeWarning:
-            print("Error: cannot handle time = 0. Try again.")
+        snr = []   
+        for i in range(len(mag)):
+            flux = self.magnitude_to_flux(mag[i]) #airmass?
+            signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
+
+            CtG = signal*gain*time
+            snr.append(CtG/(np.sqrt( (signal+bgnd*npix+DCurent*npix)*time+(readnoise**2)*npix )))                
+ 
         return np.array(snr)
 
  
@@ -488,8 +473,11 @@ will be highly appreciated!
         self.actionvisit_DEC_on_GitHub.triggered.connect(lambda: webbrowser.open('https://github.com/3fon3fonov/DetExCal'))
         self.actionCredits.triggered.connect(lambda: self.print_info_credits())
 
- 
+
+        self.update_color_picker() 
         self.update_SNR_plot()
+
+
 
         self.SNR_plot_cross_hair.stateChanged.connect(self.update_SNR_plot)
         self.SNR_plot_cross_hair_2.stateChanged.connect(self.update_SNR_plot)
@@ -510,10 +498,6 @@ will be highly appreciated!
 
 
         self.rv_model_width.valueChanged.connect(self.update_SNR_plot) 
-
-        #self.SNR_plot_autorange.valueChanged.connect(self.update_SNR_plot) 
-  
-
         self.snr_model_color.clicked.connect(self.get_model_color)
  
         #print("""Here you can get some more information from the tool's workflow, stdout/strerr, and piped results.""")
@@ -533,7 +517,6 @@ def main():
   
     screen_resolution = app.desktop().screenGeometry()
     width, height = screen_resolution.width(), screen_resolution.height()
-    #print(width, height)
     if height < 920:
         window.setMinimumWidth(width*0.6)
         window.setMinimumHeight(height*0.6)

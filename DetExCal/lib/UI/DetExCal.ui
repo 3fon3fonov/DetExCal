@@ -187,7 +187,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Max Int. time</string>
+                    <string>Max. Int. time</string>
                    </property>
                   </widget>
                  </item>
@@ -306,8 +306,11 @@
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="toolTip">
+                    <string>Total collecting area of the telescope. This is the area of pirmary mirror -- the area of secondary mirror</string>
+                   </property>
                    <property name="text">
-                    <string>Aperture</string>
+                    <string extracomment="test">Total aperture</string>
                    </property>
                   </widget>
                  </item>
@@ -354,7 +357,7 @@
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>2.000000000000000</double>
+                    <double>1.300000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -429,7 +432,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Dark Current</string>
+                    <string>Dark current</string>
                    </property>
                   </widget>
                  </item>
@@ -617,7 +620,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Read noise</string>
+                    <string>Readout noise</string>
                    </property>
                   </widget>
                  </item>
@@ -665,7 +668,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Bandwigth</string>
+                    <string>Bandwidth</string>
                    </property>
                   </widget>
                  </item>
@@ -704,6 +707,9 @@
                      <width>100</width>
                      <height>16777215</height>
                     </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Total throughput over all refractive optical surfaces of the telescope</string>
                    </property>
                    <property name="text">
                     <string>Total throughput</string>
