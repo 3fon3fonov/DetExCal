@@ -3,10 +3,10 @@
  
 
 <p align="center">
-  <img width="400" src="./DetExCal.png">
+  <img width="700" src="./DetExCal.png">
 </p>
  
-**DetExCal** is a simple SNR calculator with a convenient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
+**DetExCal** is a simple CCD-SNR calculator with a convenient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
 
 
 
@@ -15,8 +15,6 @@
 * Trifon Trifonov, MPIA Heidelberg.
 
  
-
-
 Please keep in mind that this software is developed mainly for my needs and for fun. I hope, however, that you may find it capable of solving your scientific problems, too. At the moment, there is NO documentation,
 but as you will find, the GUI is self-explanatory.   
 
@@ -28,29 +26,28 @@ Just open an "Issue" on the GitHub, or send a PM to trifonov@mpia.de.
 
 **Installation**
 
-$ pip install git+https://github.com/3fon3fonov/DetExCal   
+Python3.6+ is strongly recommended. 
+
+$ pip3 install git+https://github.com/3fon3fonov/DetExCal   
 
 or git clone:
 
 $ git clone https://github.com/3fon3fonov/DetExCal   
 $ cd DetExCal   
-$ python setup.py install   
+$ python3 setup.py install   
 
-However, please read the [Installation instructions](README_for_installation),
-because some problems may occur depending on your OS system.   
+Then, to load the GUI, on a bash shell type: 
 
-Python3.6+ is strongly recommended. 
+$ DetExCal 
 
-**Usage**
 
-* To load the GUI, on a bash shell type: 
+or, after git clone, simply:
 
-$ DetExCal (in case of pip install)
+$ git clone https://github.com/3fon3fonov/DetExCal   
+$ cd DetExCal   
+$ python3 DetExCal.py 
 
-* or just do:
 
-$ python3 DetExCal.py (inside of the git clone directory)
- 
 
  
 
@@ -64,6 +61,6 @@ If you made the use of DetExCal, make me happy and let me know :)))
 http://www.pyqtgraph.org/
 
 * Additionally, DetExCal uses "standard" Python libraries like 
-"PyQt5",  "numpy",  and  "dill".
+"PyQt5", "numpy", and "dill".
 
  
