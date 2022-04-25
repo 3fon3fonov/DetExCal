@@ -13,7 +13,6 @@ import webbrowser
 es_path = os.path.dirname(os.path.abspath(__file__))
 lib_path = os.path.join(es_path, 'lib')
 
-print(lib_path)
 sys.path.insert(0,lib_path)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,14 +35,8 @@ from symbols_window import show_symbols
 #import terminal
 import ntpath
 import pg_hack
-
-from scipy.signal import argrelextrema
-from scipy.stats.stats import pearsonr   
-import scipy.stats as stat
-from scipy.interpolate import interp1d
  
-import dill
-dill._dill._reverse_typemap['ObjectType'] = object
+ 
 #os.system("taskset -p %s" %os.getpid())
 os.environ["OPENBLAS_MAIN_FREE"] = "1"
 #os.environ["QT_QPA_PLATFORM"] = "offscreen"

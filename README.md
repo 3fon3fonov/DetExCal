@@ -61,6 +61,6 @@ If you made the use of DetExCal, make me happy and let me know :)))
 http://www.pyqtgraph.org/
 
 * Additionally, DetExCal uses "standard" Python libraries like 
-"PyQt5", "numpy", and "dill".
+"PyQt5", "numpy", and "scipy".
 
  
