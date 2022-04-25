@@ -3,7 +3,7 @@
  
 
 <p align="center">
-  <img width="700" src="./DetExCal.png">
+  <img width="700" src="./DetExCal.jpg">
 </p>
  
 **DetExCal** is a simple CCD-SNR calculator with a convenient GUI interface. It can calculate SNR vs. time and SNR vs. V-band magnitude. 
