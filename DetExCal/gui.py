@@ -105,7 +105,7 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
 ################################## Plots #######################################
 
     def initialize_plots(self):
-        global p1,p2
+        global p1,p2,leg1,leg2
 
         p1  = self.graphicsView_CCD_SNR
         p2  = self.graphicsView_CCD_SNR_2
@@ -144,8 +144,28 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
         p1.showGrid(x=True, y=True,alpha=0.2)
         p2.showGrid(x=True, y=True,alpha=0.2) 
 
+        leg1 = p1.plotItem.addLegend()
+        leg2 = p2.plotItem.addLegend()
+
         return
 
+    def update_font_plots(self):
+        global p1,p2 
+
+        zzz = [p1,p2]
+
+        for i in range(len(zzz)):
+
+            zzz[i].getAxis('left').setWidth(np.rint(50.0*(float(self.plot_font.pointSize())/11.0)))
+            zzz[i].getAxis("left").tickFont = self.plot_font
+            zzz[i].getAxis('bottom').setHeight(np.rint(50.0*(float(self.plot_font.pointSize())/11.0)))
+
+            zzz[i].getAxis("bottom").tickFont = self.plot_font
+            # zzz[i].getAxis("left").setStyle(tickTextOffset=20)        
+            #  zzz[i].getAxis("bottom").setStyle(tickTextOffset=20)        
+
+            zzz[i].setLabel('bottom', '%s'%zzz[i].getAxis("bottom").labelText, units='', **{'font-size':'%dpt'%self.plot_font.pointSize()})
+            zzz[i].setLabel('left', '%s'%zzz[i].getAxis("left").labelText, units='', **{'font-size':'%dpt'%self.plot_font.pointSize()})
 
 
     def set_widget_font(self, widget):
@@ -367,7 +387,7 @@ will be highly appreciated!
  
 
     def update_SNR_plot(self):
-        global p1,p2
+        global p1,p2,leg1,leg2
  
         if not self.hold_old_plot.isChecked():    
             p1.plot(clear=True,)
@@ -395,17 +415,17 @@ will be highly appreciated!
         DCurent       = self.Dark_current.value() #*self.seeing.value()* self.plate_scale.value()
         readnoise = self.Read_noise.value() 
  
-
         snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
-
-        leg1 = p1.plotItem.addLegend()
-        leg2 = p2.plotItem.addLegend()
-       # if self.legend.isChecked()==False:
-       #     try:
-       #         p1.plotItem.legend.scene().removeItem(p1.plotItem.legend)
-       #     except Exception as e:
-       #             pass
+        
+        if self.legend.isChecked()==True:
+            leg1.clear()
+            leg2.clear()            
+            leg1.setVisible(True)
+            leg2.setVisible(True)
+        else:
+            leg1.setVisible(False)
+            leg2.setVisible(False)
 
         if self.radioButton_SNR.isChecked():
  

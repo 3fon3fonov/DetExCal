@@ -2118,7 +2118,7 @@
             <item row="7" column="0">
              <widget class="QCheckBox" name="legend">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="font">
                <font>

@@ -1026,7 +1026,7 @@ class Ui_MainWindow(object):
         self.plot_DC.setObjectName("plot_DC")
         self.gridLayout_3.addWidget(self.plot_DC, 0, 6, 1, 1)
         self.legend = QtWidgets.QCheckBox(self.plot_options_tabs)
-        self.legend.setEnabled(False)
+        self.legend.setEnabled(True)
         font = QtGui.QFont()
         font.setPointSize(8)
         font.setBold(False)
