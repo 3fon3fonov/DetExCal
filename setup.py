@@ -27,7 +27,7 @@ else:
 
 setup(
 name='DetExCal',  
-version='0.01',
+version='0.02',
 scripts=['scripts/DetExCal'],
 author="Trifon Trifonov",
 author_email="trifonov@mpia.de",
@@ -49,5 +49,4 @@ extras_requires={
 
 license="MIT"
  )
- 
  
