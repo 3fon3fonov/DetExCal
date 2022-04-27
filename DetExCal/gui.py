@@ -397,8 +397,6 @@ will be highly appreciated!
             p2.plot(clear=False,)
 
         #p1.addLine(x=None, y=0,   pen=pg.mkPen('#ff9933', width=0.8))
-        time       = np.arange(1,self.Max_int_time.value(),1)
-        #magnitudes = np.arange(0,self.V_band.value()+0.1,0.1)
         time       = np.linspace(0.1,self.Max_int_time.value(),300)
         magnitudes = np.linspace(-3,self.V_band.value()+0.1,300)
  
@@ -406,14 +404,14 @@ will be highly appreciated!
 
         radius = (self.seeing.value()*(self.plate_scale.value() / self.CCD_px.value()))/2.0 # [pix/"] 
         flux = self.magnitude_to_flux(self.V_band.value()) #airmass?
-        bgr  = self.magnitude_to_flux(self.Sky.value()) #-2.5*np.log10((self.CCD_px.value()/self.plate_scale.value())**2)
+        bgr  = self.magnitude_to_flux(self.Sky.value()) * (self.CCD_px.value()/self.plate_scale.value())**2
 
         npix = np.pi* (radius**2)
 
         signal   = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
         bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
-        DCurent       = self.Dark_current.value() #*self.seeing.value()* self.plate_scale.value()
-        readnoise = self.Read_noise.value() 
+        DCurent       = self.Dark_current.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
+        readnoise = self.Read_noise.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
  
         snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
@@ -564,10 +562,10 @@ will be highly appreciated!
             snr.append(SI / (np.sqrt( SI + BG + DC + RN )))   
     
             Int_signal.append(SI)
-            Int_photnoise.append(np.sqrt( SI))  
-            Int_bgnd.append(BG)
-            Int_DCurent.append(DC)
-            Int_readnoise.append(RN)
+            Int_photnoise.append(np.sqrt(SI))  
+            Int_bgnd.append(np.sqrt(BG))
+            Int_DCurent.append(np.sqrt(DC))
+            Int_readnoise.append(np.sqrt(RN))
             Total_noise.append( np.sqrt( SI + BG + DC + RN ))   
 
         return [np.array(snr),np.array(Int_signal),np.array(Int_photnoise),np.array(Int_bgnd),np.array(Int_DCurent),np.array(Int_readnoise),np.array(Total_noise)]
@@ -596,11 +594,12 @@ will be highly appreciated!
 
             SI = signal*gain*time
             snr.append(SI / (np.sqrt( SI + BG + DC + RN ))) 
-            Int_photnoise.append(np.sqrt( SI))  
+
             Int_signal.append(SI)
-            Int_bgnd.append(BG)
-            Int_DCurent.append(DC)
-            Int_readnoise.append(RN)
+            Int_photnoise.append(np.sqrt(SI))  
+            Int_bgnd.append(np.sqrt(BG))
+            Int_DCurent.append(np.sqrt(DC))
+            Int_readnoise.append(np.sqrt(RN))
             Total_noise.append( np.sqrt( SI + BG + DC + RN ))   
  
         return [np.array(snr),np.array(Int_signal),np.array(Int_photnoise),np.array(Int_bgnd),np.array(Int_DCurent),np.array(Int_readnoise),np.array(Total_noise)]
