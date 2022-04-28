@@ -27,7 +27,7 @@ else:
 
 setup(
 name='DetExCal',  
-version='0.03',
+version='0.04',
 scripts=['scripts/DetExCal'],
 author="Trifon Trifonov",
 author_email="trifonov@mpia.de",

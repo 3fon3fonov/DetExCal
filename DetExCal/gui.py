@@ -10,12 +10,14 @@ import sys, os, traceback
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import webbrowser
  
+
 es_path = os.path.dirname(os.path.abspath(__file__))
 lib_path = os.path.join(es_path, 'lib')
 
 sys.path.insert(0,lib_path)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+import detexcal 
 
 if QtCore.QT_VERSION >= 0x50501:
     def excepthook(type_, value, traceback_):
@@ -413,9 +415,20 @@ will be highly appreciated!
         DCurent       = self.Dark_current.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
         readnoise = self.Read_noise.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
  
-        snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
+        #snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
+        SNR_time = detexcal.getSNR(
+        signal=signal,
+        bgnd=bg_noise, 
+        DCurent =DCurent, 
+        time=time, 
+        readnoise=readnoise, 
+        npix=npix)
         
+        SNR_time.ccd_SNR_vs_time() 
+
+ 
+ 
         if self.legend.isChecked()==True:
             leg1.clear()
             leg2.clear()            
@@ -428,7 +441,7 @@ will be highly appreciated!
         if self.radioButton_SNR.isChecked():
  
             if self.plot_snr.isChecked():
-                model_curve = p1.plot(time,snr_vs_time[0], 
+                model_curve = p1.plot(time,SNR_time.snr, 
                 pen={'color': colors[0], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="SNR") 
                 
@@ -438,32 +451,32 @@ will be highly appreciated!
 
         else:
             if self.plot_signal.isChecked():
-                model_curve_SI = p1.plot(time,snr_vs_time[1], 
+                model_curve_SI = p1.plot(time,SNR_time.IntSignal, 
                 pen={'color': colors[1], 'width': self.signal_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Signal") 
                 model_curve_SI.setZValue(self.signal_model_z.value()) 
             if self.plot_PN.isChecked():
-                model_curve_SI_noise = p1.plot(time,snr_vs_time[2], 
+                model_curve_SI_noise = p1.plot(time,SNR_time.IntPhotonNoise, 
                 pen={'color': colors[2], 'width': self.PN_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Photon noise")
                 model_curve_SI_noise.setZValue(self.PN_model_z.value()) 
             if self.plot_BG.isChecked():
-                model_curve_BG = p1.plot(time,snr_vs_time[3], 
+                model_curve_BG = p1.plot(time,SNR_time.IntBackground, 
                 pen={'color': colors[3], 'width': self.BG_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="BG noise")
                 model_curve_BG.setZValue(self.BG_model_z.value()) 
             if self.plot_DC.isChecked():
-                model_curve_DC = p1.plot(time,snr_vs_time[4], 
+                model_curve_DC = p1.plot(time,SNR_time.IntDCurent, 
                 pen={'color': colors[4], 'width': self.DC_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="DC noise")
                 model_curve_DC.setZValue(self.DC_model_z.value()) 
             if self.plot_RN.isChecked():
-                model_curve_RN = p1.plot(time,snr_vs_time[5], 
+                model_curve_RN = p1.plot(time,SNR_time.IntReadNoise, 
                 pen={'color': colors[5], 'width': self.RN_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="RN noise")      
                 model_curve_RN.setZValue(self.RN_model_z.value())       
             if self.plot_TN.isChecked():
-                model_curve_TN = p1.plot(time,snr_vs_time[6], 
+                model_curve_TN = p1.plot(time,SNR_time.TotalNoise, 
                 pen={'color': colors[6], 'width': self.TN_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Total noise")          
                 model_curve_TN.setZValue(self.TN_model_z.value())       
@@ -472,13 +485,27 @@ will be highly appreciated!
             p1.setLabel('left', 'electrons [e-]', units='',  **{'font-size':self.plot_font.pointSize()})    
 
 
- 
 
-        snr_vs_mag = np.array(self.ccd_SNR_vs_mag(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=self.Max_int_time.value(), readnoise=readnoise, npix=npix,mag=magnitudes))
+        SNR_mag = detexcal.getSNR(
+        signal=signal,
+        bgnd=bg_noise,
+        DCurent =DCurent, 
+        time=time[-1],
+        readnoise=readnoise,
+        npix=npix, 
+        mag=magnitudes,
+        aperture = self.Aperture.value(),
+        throughput = self.Throughput.value()/100.0,
+        bandwidth=self.Bandwidth.value(),
+        quant_eff=self.Quant_eff.value()/100.0
+        )
+        
+        SNR_mag.ccd_SNR_vs_mag() 
+ 
 
         if self.radioButton_SNR_2.isChecked():    
             if self.plot_snr.isChecked():
-                model_curve_mag = p2.plot(magnitudes,snr_vs_mag[0], 
+                model_curve_mag = p2.plot(magnitudes,SNR_mag.snr, 
                 pen={'color': colors[0], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True) 
                 
@@ -486,39 +513,39 @@ will be highly appreciated!
 
             p2.setLabel('bottom', 'V-band magnitude', units='',  **{'font-size':self.plot_font.pointSize()})    
             p2.setLabel('left', 'SNR', units='',  **{'font-size':self.plot_font.pointSize()})   
-            sub_snr = snr_vs_mag[0][np.where(magnitudes > self.V_band.value()-3)]
+            sub_snr = SNR_mag.snr[np.where(magnitudes > self.V_band.value()-3)]
             p2.setYRange(0, max(sub_snr) , padding=0.01)
         else:
             if self.plot_signal.isChecked():
-                model_curve_SI_mag = p2.plot(magnitudes,snr_vs_mag[1], 
+                model_curve_SI_mag = p2.plot(magnitudes,SNR_mag.IntSignal, 
                 pen={'color': colors[1], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Signal")
                 model_curve_SI_mag.setZValue(self.snr_model_z.value()) 
             if self.plot_PN.isChecked():
-                model_curve_SI_noise_mag = p2.plot(magnitudes,snr_vs_mag[2], 
+                model_curve_SI_noise_mag = p2.plot(magnitudes,SNR_mag.IntPhotonNoise, 
                 pen={'color': colors[2], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Photon noise")
             if self.plot_BG.isChecked():
-                model_curve_BG_mag = p2.plot(magnitudes,snr_vs_mag[3], 
+                model_curve_BG_mag = p2.plot(magnitudes,SNR_mag.IntBackground, 
                 pen={'color': colors[3], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="BG noise")
             if self.plot_DC.isChecked():
-                model_curve_DC_mag = p2.plot(magnitudes,snr_vs_mag[4], 
+                model_curve_DC_mag = p2.plot(magnitudes,SNR_mag.IntDCurent, 
                 pen={'color': colors[4], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="DC noise")
             if self.plot_RN.isChecked():
-                model_curve_RN_mag = p2.plot(magnitudes,snr_vs_mag[5], 
+                model_curve_RN_mag = p2.plot(magnitudes,SNR_mag.IntReadNoise, 
                 pen={'color': colors[5], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="RN noise") 
             if self.plot_TN.isChecked():
-                model_curve_TN_mag = p2.plot(magnitudes,snr_vs_mag[6], 
+                model_curve_TN_mag = p2.plot(magnitudes,SNR_mag.TotalNoise, 
                 pen={'color': colors[6], 'width': self.snr_model_width.value()},enableAutoRange=True, #symbolPen={'color': 0.5, 'width': 0.1}, symbolSize=1,symbol='o',
                 viewRect=True, name="Total noise")      
 
             p2.setLabel('bottom', 'V-band magnitude', units='',  **{'font-size':self.plot_font.pointSize()})    
             p2.setLabel('left', 'electrons [e-]', units='',  **{'font-size':self.plot_font.pointSize()})    
 
-            sub_snr = snr_vs_mag[0][np.where(magnitudes > self.V_band.value()-3)]
+            sub_snr = SNR_mag.snr[np.where(magnitudes > self.V_band.value()-3)]
             p2.setYRange(0, max(sub_snr) , padding=0.01)
             
         p2.getViewBox().invertX(True)
@@ -538,72 +565,6 @@ will be highly appreciated!
         if self.SNR_plot_cross_hair_2.isChecked():
             self.cross_hair(p2,log=self.signal_xaxis_log.isChecked())  
 
-
- 
-    def ccd_SNR_vs_time(self,signal=1,bgnd=0,readnoise=0,DCurent=0,npix=1,time=1,gain=1):
-        """
-        CCD equation. Gain is ignorred for now.
-        """
-        snr = []
-        Int_signal =[] 
-        Int_photnoise =[] 
-        Int_bgnd =[] 
-        Int_DCurent =[] 
-        Int_readnoise =[] 
-        Total_noise = []
-  
-        RN = (readnoise**2)*npix
-
-        for i in range(len(time)):
-            SI = signal*gain*time[i]
-            BG = bgnd*npix*time[i]
-            DC = DCurent*npix*time[i]
-
-            snr.append(SI / (np.sqrt( SI + BG + DC + RN )))   
-    
-            Int_signal.append(SI)
-            Int_photnoise.append(np.sqrt(SI))  
-            Int_bgnd.append(np.sqrt(BG))
-            Int_DCurent.append(np.sqrt(DC))
-            Int_readnoise.append(np.sqrt(RN))
-            Total_noise.append( np.sqrt( SI + BG + DC + RN ))   
-
-        return [np.array(snr),np.array(Int_signal),np.array(Int_photnoise),np.array(Int_bgnd),np.array(Int_DCurent),np.array(Int_readnoise),np.array(Total_noise)]
-
-    def ccd_SNR_vs_mag(self,signal=1,bgnd=0,readnoise=0,DCurent=0,npix=1,time=1,gain=1,mag=0):
-        """
-        CCD equation. Gain is ignorred for now.
-        """
-        snr = []   
-
-        snr = []
-        Int_signal =[] 
-        Int_photnoise =[] 
-        Int_bgnd =[] 
-        Int_DCurent =[] 
-        Int_readnoise =[] 
-        Total_noise = []
-
-        RN = (readnoise**2)*npix
-        BG = bgnd*npix*time
-        DC = DCurent*npix*time
-
-        for i in range(len(mag)):
-            flux = self.magnitude_to_flux(mag[i]) #airmass?
-            signal  = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
-
-            SI = signal*gain*time
-            snr.append(SI / (np.sqrt( SI + BG + DC + RN ))) 
-
-            Int_signal.append(SI)
-            Int_photnoise.append(np.sqrt(SI))  
-            Int_bgnd.append(np.sqrt(BG))
-            Int_DCurent.append(np.sqrt(DC))
-            Int_readnoise.append(np.sqrt(RN))
-            Total_noise.append( np.sqrt( SI + BG + DC + RN ))   
- 
-        return [np.array(snr),np.array(Int_signal),np.array(Int_photnoise),np.array(Int_bgnd),np.array(Int_DCurent),np.array(Int_readnoise),np.array(Total_noise)]
-
  
 ################################################################################################
 
@@ -611,7 +572,7 @@ will be highly appreciated!
 
     def __init__(self):
         
-        DEC_version = "0.03"
+        DEC_version = "0.04"
  
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
