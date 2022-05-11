@@ -79,6 +79,7 @@ class getSNR:
         self.IntReadNoise =np.array(Int_readnoise) 
         self.TotalNoise = np.array(Total_noise)
 
+
         return 
 
 
@@ -98,7 +99,7 @@ class getSNR:
 
         for mag in np.atleast_1d(np.array(self.mag)):
             flux = self.magnitude_to_flux(mag) #airmass?
-            signal  = flux*(np.pi*self.aperture**2)*(self.throughput)*(self.bandwidth)*(self.quant_eff)
+            signal  = flux*self.aperture*(self.throughput)*(self.bandwidth)*(self.quant_eff)
 
             SI = signal*self.gain*self.time
             snr.append(SI / (np.sqrt( SI + BG + DC + RN ))) 

@@ -129,16 +129,17 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
             zzz[i].getAxis("top").setStyle(tickTextOffset = 12, tickFont = self.plot_font)
             zzz[i].getAxis("left").setStyle(tickTextOffset = 12, tickFont = self.plot_font)
             zzz[i].getAxis("right").setStyle(tickTextOffset = 12, tickFont = self.plot_font)
-            zzz[i].getAxis('left').setWidth(50)
+           # zzz[i].getAxis('left').setWidth(70)
             zzz[i].getAxis('right').setWidth(10)
             zzz[i].getAxis('top').setHeight(10)
-            zzz[i].getAxis('bottom').setHeight(50)
+            #zzz[i].getAxis('bottom').setHeight(50)
                         
             zzz[i].setLabel('bottom', '%s'%xaxis[i], units='%s'%xunit[i],  **{'font-size':self.plot_font.pointSize()})
             zzz[i].setLabel('left',   '%s'%yaxis[i], units='%s'%yunit[i],  **{'font-size':self.plot_font.pointSize()})       
             zzz[i].showAxis('top') 
             zzz[i].showAxis('right') 
             zzz[i].getAxis('bottom').enableAutoSIPrefix(enable=False)
+            zzz[i].getAxis('left').enableAutoSIPrefix(enable=False)
             #zzz[i].autoRange()
             zzz[i].getViewBox().parentItem().ctrlMenu.actions()[-4].setVisible(False) #removes the "Avarage" junk
 
@@ -231,7 +232,7 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
             p.save(img, "jpg")
 
 
-    def print_info_credits(self, image=False, es_version='0.03'):
+    def print_info_credits(self, image=False, es_version='0.041'):
  
         self.dialog_credits.setFixedSize(700, 700)
         self.dialog_credits.setWindowTitle('Credits')  
@@ -405,15 +406,21 @@ will be highly appreciated!
 
 
         radius = (self.seeing.value()*(self.plate_scale.value() / self.CCD_px.value()))/2.0 # [pix/"] 
-        flux = self.magnitude_to_flux(self.V_band.value()) #airmass?
+        flux = self.magnitude_to_flux(self.V_band.value())  #* (self.CCD_px.value()/self.plate_scale.value())**2 #airmass?
         bgr  = self.magnitude_to_flux(self.Sky.value()) * (self.CCD_px.value()/self.plate_scale.value())**2
 
         npix = np.pi* (radius**2)
 
-        signal   = flux*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
-        bg_noise = bgr*(np.pi*self.Aperture.value()**2)*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
+        area = np.pi*( (self.Aperture.value()/2)**2  -  (self.Aperture_sec.value()/2)**2 )
+
+
+        signal   = flux*area*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
+        bg_noise = bgr*area*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
         DCurent       = self.Dark_current.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
         readnoise = self.Read_noise.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
+
+
+        #signal = 48356.0/100
  
         #snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
@@ -426,6 +433,8 @@ will be highly appreciated!
         npix=npix)
         
         SNR_time.ccd_SNR_vs_time() 
+
+        print(radius,npix,flux,signal,SNR_time.IntSignal[-1], SNR_time.snr[-1])
 
  
  
@@ -494,7 +503,7 @@ will be highly appreciated!
         readnoise=readnoise,
         npix=npix, 
         mag=magnitudes,
-        aperture = self.Aperture.value(),
+        aperture = area,
         throughput = self.Throughput.value()/100.0,
         bandwidth=self.Bandwidth.value(),
         quant_eff=self.Quant_eff.value()/100.0
@@ -572,7 +581,7 @@ will be highly appreciated!
 
     def __init__(self):
         
-        DEC_version = "0.04"
+        DEC_version = "0.041"
  
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
@@ -613,6 +622,7 @@ will be highly appreciated!
 
         self.V_band.valueChanged.connect(self.update_SNR_plot)
         self.Aperture.valueChanged.connect(self.update_SNR_plot)
+        self.Aperture_sec.valueChanged.connect(self.update_SNR_plot)
         self.Bandwidth.valueChanged.connect(self.update_SNR_plot)
         self.Quant_eff.valueChanged.connect(self.update_SNR_plot)
         self.Max_int_time.valueChanged.connect(self.update_SNR_plot) 
