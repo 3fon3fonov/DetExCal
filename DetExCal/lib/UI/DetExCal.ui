@@ -531,7 +531,7 @@
                     <double>30.000000000000000</double>
                    </property>
                    <property name="value">
-                    <double>100.000000000000000</double>
+                    <double>90.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -634,7 +634,7 @@
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>1.500000000000000</double>
+                    <double>8.199999999999999</double>
                    </property>
                   </widget>
                  </item>
@@ -823,7 +823,7 @@
                     <string> [mag]</string>
                    </property>
                    <property name="value">
-                    <double>20.000000000000000</double>
+                    <double>22.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -906,7 +906,7 @@
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>33.799999999999997</double>
+                    <double>128.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -928,7 +928,7 @@
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>4.000000000000000</double>
+                    <double>2.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -953,7 +953,7 @@
                     <double>100.000000000000000</double>
                    </property>
                    <property name="value">
-                    <double>100.000000000000000</double>
+                    <double>80.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -1016,7 +1016,7 @@
                     <double>1.000000000000000</double>
                    </property>
                    <property name="value">
-                    <double>24.000000000000000</double>
+                    <double>13.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -1076,13 +1076,13 @@
                     <number>3</number>
                    </property>
                    <property name="minimum">
-                    <double>0.100000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                    <property name="maximum">
                     <double>10.000000000000000</double>
                    </property>
                    <property name="singleStep">
-                    <double>0.100000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                    <property name="value">
                     <double>0.550000000000000</double>
@@ -1101,7 +1101,7 @@
                     <string> [e-/px/read]</string>
                    </property>
                    <property name="value">
-                    <double>10.000000000000000</double>
+                    <double>5.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -1117,7 +1117,7 @@
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.500000000000000</double>
+                    <double>1.100000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -2616,8 +2616,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_color_picker"/>
   <buttongroup name="buttonGroup_SNR_elect"/>
+  <buttongroup name="buttonGroup_color_picker"/>
   <buttongroup name="buttonGroup_SNR_elect_2"/>
  </buttongroups>
 </ui>

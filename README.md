@@ -26,15 +26,23 @@ Just open an "Issue" on the GitHub, or send a PM to trifonov@mpia.de.
 
 **Installation**
 
-Python3.6+ is strongly recommended. 
+Python3.8+ is strongly recommended!!! The DetExCal works with Python3.6,3.7, but if your system Python3 is 3.6 or 3.7, it is recommended to not upgrade the python3, but to install python3.8 alongside your system python3. E.g., [see these instructions](https://linuxize.com/post/how-to-install-python-3-8-on-ubuntu-18-04/)
 
-$ pip3 install git+https://github.com/3fon3fonov/DetExCal   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+
+Let's assume, you have python3.8, then it is recommended to install pip3.8:
+
+$ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py   
+$ python3.8 get-pip.py    
+
+
+$ pip3.8 install git+https://github.com/3fon3fonov/DetExCal --user  
 
 or git clone:
 
 $ git clone https://github.com/3fon3fonov/DetExCal   
 $ cd DetExCal   
-$ python3 setup.py install   
+$ python3.8 setup.py install   
 
 Then, to load the GUI, on a bash shell type: 
 
@@ -45,7 +53,7 @@ or, after git clone, simply:
 
 $ git clone https://github.com/3fon3fonov/DetExCal   
 $ cd DetExCal   
-$ python3 DetExCal.py 
+$ python3.8 DetExCal.py 
 
 
 

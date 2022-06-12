@@ -48,7 +48,6 @@ class getSNR:
         CCD equation. Gain is ignorred for now.
         """
  
-        RN = (self.readnoise**2)*self.npix
         snr = []
         Int_signal =[] 
         Int_photnoise =[] 
@@ -56,20 +55,54 @@ class getSNR:
         Int_DCurent =[] 
         Int_readnoise =[] 
         Total_noise = []
-        
-        for i in np.atleast_1d(np.array(self.time)):
-            SI = self.signal*self.gain*i
-            BG = self.bgnd*self.npix*i
-            DC = self.DCurent*self.npix*i
 
-            snr.append(SI / (np.sqrt( SI + BG + DC + RN )))   
+        """       
+        RN = np.sqrt((self.readnoise**2)*self.npix)
+ 
+        for i in np.atleast_1d(np.array(self.time)):
+            SI  = self.signal*self.gain*i #*0.29#one pixel, collects about 29% of the total light
+            SG  = np.sqrt(SI)
+            BG  = np.sqrt(self.bgnd*self.npix*i)
+            DC  = np.sqrt(self.DCurent*self.npix*i)
+            TOT = np.sqrt( SG**2 + BG**2 + DC**2 + RN**2 )
+
+
+            snr.append(SI / TOT)   
+
+            Int_signal.append(SI)
+            Int_photnoise.append(SG)  
+            Int_bgnd.append(BG)
+            Int_DCurent.append(DC)
+            Int_readnoise.append(RN)
+            Total_noise.append(TOT)
+            
+        self.snr = np.array(snr)
+        self.IntSignal = np.array(Int_signal)
+        self.IntPhotonNoise =np.array(Int_photnoise) 
+        self.IntBackground =np.array(Int_bgnd)
+        self.IntDCurent =np.array(Int_DCurent) 
+        self.IntReadNoise =np.array(Int_readnoise) 
+        self.TotalNoise = np.array(Total_noise)
+        """
+
+        RN = (self.readnoise**2)
+
+        for i in np.atleast_1d(np.array(self.time)):
+            SI  = self.signal*self.gain*i *0.027#one pixel, collects about 29% of the total light
+            SG  = np.sqrt(SI)
+            BG  = self.bgnd*i*0.027
+            DC  = self.DCurent*i
+            TOT = np.sqrt( SI + (BG + DC + RN)*self.npix)
+
+
+            snr.append(SI / TOT)   
     
             Int_signal.append(SI)
-            Int_photnoise.append(np.sqrt(SI))  
-            Int_bgnd.append(np.sqrt(BG))
-            Int_DCurent.append(np.sqrt(DC))
-            Int_readnoise.append(np.sqrt(RN))
-            Total_noise.append( np.sqrt( SI + BG + DC + RN ))
+            Int_photnoise.append(SG)  
+            Int_bgnd.append(BG)
+            Int_DCurent.append(DC)
+            Int_readnoise.append(RN)
+            Total_noise.append(TOT)
             
         self.snr = np.array(snr)
         self.IntSignal = np.array(Int_signal)
@@ -79,13 +112,12 @@ class getSNR:
         self.IntReadNoise =np.array(Int_readnoise) 
         self.TotalNoise = np.array(Total_noise)
 
-
         return 
 
 
     def ccd_SNR_vs_mag(self):
  
-        RN = (self.readnoise**2)*self.npix
+        RN = self.readnoise**2
         snr = []
         Int_signal =[] 
         Int_photnoise =[] 
@@ -94,22 +126,25 @@ class getSNR:
         Int_readnoise =[] 
         Total_noise = []
 
-        BG = self.bgnd*self.npix*self.time
-        DC = self.DCurent*self.npix*self.time
+        BG = self.bgnd*self.time
+        DC = self.DCurent*self.time
 
         for mag in np.atleast_1d(np.array(self.mag)):
             flux = self.magnitude_to_flux(mag) #airmass?
             signal  = flux*self.aperture*(self.throughput)*(self.bandwidth)*(self.quant_eff)
 
             SI = signal*self.gain*self.time
-            snr.append(SI / (np.sqrt( SI + BG + DC + RN ))) 
+            SG  = np.sqrt(SI)
+            TOT = np.sqrt( SI + (BG + DC + RN)*self.npix)
+            
+            snr.append(SI / TOT)   
 
             Int_signal.append(SI)
-            Int_photnoise.append(np.sqrt(SI))  
-            Int_bgnd.append(np.sqrt(BG))
-            Int_DCurent.append(np.sqrt(DC))
-            Int_readnoise.append(np.sqrt(RN))
-            Total_noise.append( np.sqrt( SI + BG + DC + RN ))   
+            Int_photnoise.append(SG)  
+            Int_bgnd.append(BG)
+            Int_DCurent.append(DC)
+            Int_readnoise.append(RN)
+            Total_noise.append(TOT)
 
         self.snr = np.array(snr)
         self.IntSignal = np.array(Int_signal)

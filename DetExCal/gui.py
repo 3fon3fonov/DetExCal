@@ -232,7 +232,7 @@ class DetExCal(QtWidgets.QMainWindow, Ui_MainWindow):
             p.save(img, "jpg")
 
 
-    def print_info_credits(self, image=False, es_version='0.041'):
+    def print_info_credits(self, image=False, es_version='0.042'):
  
         self.dialog_credits.setFixedSize(700, 700)
         self.dialog_credits.setWindowTitle('Credits')  
@@ -385,8 +385,8 @@ will be highly appreciated!
                 plot_wg.removeItem(kk)
                 
     def magnitude_to_flux(self,magnitude):
+        #return 9.6e10*(10**(-magnitude/2.5))  # phot. /(um m^2 sec)
         return 9.6e10*(10**(-magnitude/2.5))  # phot. /(um m^2 sec)
- 
  
 
     def update_SNR_plot(self):
@@ -408,21 +408,15 @@ will be highly appreciated!
         radius = (self.seeing.value()*(self.plate_scale.value() / self.CCD_px.value()))/2.0 # [pix/"] 
         flux = self.magnitude_to_flux(self.V_band.value())  #* (self.CCD_px.value()/self.plate_scale.value())**2 #airmass?
         bgr  = self.magnitude_to_flux(self.Sky.value()) * (self.CCD_px.value()/self.plate_scale.value())**2
-
+ 
         npix = np.pi* (radius**2)
-
         area = np.pi*( (self.Aperture.value()/2)**2  -  (self.Aperture_sec.value()/2)**2 )
-
+ 
 
         signal   = flux*area*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)
         bg_noise = bgr*area*(self.Throughput.value()/100.0)*(self.Bandwidth.value())*(self.Quant_eff.value()/100.0)  
         DCurent       = self.Dark_current.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
         readnoise = self.Read_noise.value() #* (self.CCD_px.value()/self.plate_scale.value())**2
-
-
-        #signal = 48356.0/100
- 
-        #snr_vs_time = self.ccd_SNR_vs_time(signal=signal,bgnd=bg_noise, DCurent =DCurent, time=time, readnoise=readnoise, npix=npix)
 
         SNR_time = detexcal.getSNR(
         signal=signal,
@@ -434,7 +428,7 @@ will be highly appreciated!
         
         SNR_time.ccd_SNR_vs_time() 
 
-        print(radius,npix,flux,signal,SNR_time.IntSignal[-1], SNR_time.snr[-1])
+        print(radius,npix,flux,signal,SNR_time.IntSignal[-1], SNR_time.snr[-1], SNR_time.snr[-1]*0.27)
 
  
  
@@ -581,7 +575,7 @@ will be highly appreciated!
 
     def __init__(self):
         
-        DEC_version = "0.041"
+        DEC_version = "0.042"
  
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
